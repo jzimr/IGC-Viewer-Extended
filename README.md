@@ -1,3 +1,7 @@
+#TODO
+* Fix test onRubbishRequest
+
+
 ![Scheme](logo.png)
 
 IGC Viewer is an online service that allows users to browse information about IGC files.
