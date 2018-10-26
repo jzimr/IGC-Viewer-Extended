@@ -26,16 +26,67 @@ func getUptime() string {
 }
 
 ////////////////////////////////////////////////////////////////
-//	Function that converts a Track object to a TrackMetaInfo object
+//	Function that converts a Track object to a TrackMetaData object
 ////////////////////////////////////////////////////////////////
-func createMetaTrack(track igc.Track) TrackMetaInfo {
-	var trackInfo TrackMetaInfo
+func createTrack(track igc.Track, URL string) TrackMetaData {
+	var trackData TrackMetaData
 
 	trackDist := 0.0
 	for i := 0; i < len(track.Points)-1; i++ {
 		trackDist += track.Points[i].Distance(track.Points[i+1])
 	}
-	trackInfo = TrackMetaInfo{track.Date.String(), track.Pilot, track.GliderType, track.GliderID, trackDist}
 
-	return trackInfo
+	newID := "id" + strconv.Itoa(globalDB.Count())
+
+	trackData = TrackMetaData{newID, track.Date.String(), track.Pilot, track.GliderType, track.GliderID, trackDist, URL, getNow()}
+
+	return trackData
+}
+
+////////////////////////////////////////////////////////////////
+//	Function that returns the current UNIX time
+////////////////////////////////////////////////////////////////
+func getNow() int64 {
+	return time.Now().Unix()
+}
+
+////////////////////////////////////////////////////////////////
+//	Function that gets the last ID in database
+////////////////////////////////////////////////////////////////
+func getLastID() string {
+	trackCount := globalDB.Count() - 1
+
+	if trackCount < 0 { // If we don't have any tracks yet
+		return "-1"
+	}
+
+	return "id" + strconv.Itoa(globalDB.Count()-1)
+}
+
+////////////////////////////////////////////////////////////////
+//	Function that returns the timestamp of the latest track added
+////////////////////////////////////////////////////////////////
+func getLatestTimestamp() int64 {
+	latestTrack, ok := globalDB.Get(getLastID())
+
+	if !ok {
+		return 0
+	}
+
+	return latestTrack.Timestamp
+}
+
+////////////////////////////////////////////////////////////////
+//	Function that starts the counter
+////////////////////////////////////////////////////////////////
+func startMillCounter() time.Time {
+	return time.Now()
+}
+
+////////////////////////////////////////////////////////////////
+//	Function that ends the counter
+////////////////////////////////////////////////////////////////
+func stopMillCounter(timer time.Time) int64 {
+	duration := time.Since(timer)
+	return duration.Nanoseconds() / int64(time.Millisecond)
 }

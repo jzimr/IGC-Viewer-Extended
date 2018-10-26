@@ -17,15 +17,33 @@ type RespondWithID struct {
 	ID string `json:"id"`
 }
 
-// TrackMetaInfo includes meta information about a particular track
-type TrackMetaInfo struct {
+// TrackMetaData includes meta information about a particular track
+type TrackMetaData struct {
+	TrackID     string  `json:"track_id"`
 	Hdate       string  `json:"H_date"`
 	Pilot       string  `json:"pilot"`
 	Glider      string  `json:"glider"`
 	GliderID    string  `json:"glider_id"`
-	TrackLength float64 `json:"track_length"` //	Does not work
+	TrackLength float64 `json:"track_length"`
+	TrackSrcURL string  `json:"track_src_url"`
+	Timestamp   int64   `json:"Timestamp"`
 }
 
-// Empty is used to return an empty json body
-type Empty struct {
+// TrackMetaDataView shows a piece of the data to the client
+type TrackMetaDataView struct {
+	Hdate       string  `json:"H_date"`
+	Pilot       string  `json:"pilot"`
+	Glider      string  `json:"glider"`
+	GliderID    string  `json:"glider_id"`
+	TrackLength float64 `json:"track_length"`
+	TrackSrcURL string  `json:"track_src_url"`
+}
+
+// TickerInfo contains all data about the latest added timestamp, first timestamp of track, ...
+type TickerInfo struct {
+	Latest     int64    `json:"t_latest"`
+	Start      int64    `json:"t_start"`
+	Stop       int64    `json:"t_stop"`
+	Tracks     []string `json:"tracks"`
+	Processing int64    `json:"processing"`
 }

@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"strings"
 	"testing"
-
-	igc "github.com/marni/goigc"
 )
 
 //	Helper functions
@@ -14,9 +12,10 @@ import (
 ////////////////////////////////////////////////////////////////
 /// Resets the map
 ////////////////////////////////////////////////////////////////
-func resetTest() {
-	igcMap = make(map[string]igc.Track)
-}
+// func resetTest() {
+// 	trackMap = make(map[string]igc.Track)
+// 	metaTrackMap = make(map[string]TrackMetaData)
+// }
 
 ////////////////////////////////////////////////////////////////
 /// Tries to do a POST request to the URL and checks for errors

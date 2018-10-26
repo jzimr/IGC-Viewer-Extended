@@ -11,14 +11,18 @@ import (
 )
 
 func Test_errorRubbishRequest(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(handlerIgc))
+	server := httptest.NewServer(http.HandlerFunc(generalHandler))
 	defer server.Close()
 
 	testUrls := []string{
-		server.URL + "/igcinfo/",
+		server.URL + "/paragliding/",
+		server.URL + "/paragliding/rubbish",
 		server.URL + "/rubbish",
-		server.URL + "/igcinfo/api/rubbish",
+		server.URL + "/paragliding/api/rubbish",
 	}
+
+	tryJSONGet(testUrls[0], http.StatusNotFound, t)
+	tryJSONGet(testUrls[1], http.StatusOK, t)
 
 	for _, testURL := range testUrls {
 		resp, err := http.Get(testURL)
@@ -33,7 +37,7 @@ func Test_errorRubbishRequest(t *testing.T) {
 }
 
 func Test_errorInvalidBodyPost(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(handlerIgc))
+	server := httptest.NewServer(http.HandlerFunc(trackHandler))
 	defer server.Close()
 
 	// Test with empty body
@@ -45,7 +49,7 @@ func Test_errorInvalidBodyPost(t *testing.T) {
 }
 
 func Test_emptyArrayReturned(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(handlerIgc))
+	server := httptest.NewServer(http.HandlerFunc(trackHandler))
 	defer server.Close()
 
 	// Check that GET /api/igc returns an empty array if no tracks stored
@@ -65,7 +69,7 @@ func Test_emptyArrayReturned(t *testing.T) {
 }
 
 func Test_successAddIgcFile(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(handlerIgc))
+	server := httptest.NewServer(http.HandlerFunc(trackHandler))
 	defer server.Close()
 
 	// Test for valid url with valid JSON body
@@ -95,12 +99,12 @@ func Test_successAddIgcFile(t *testing.T) {
 	if len(testIgcMap) != 1 {
 		t.Errorf("Expected an array length of 1, got %d", len(testIgcMap))
 	}
-	resetTest() // This is necessary or else other tests will use the data produced here.
+	// resetTest() // This is necessary or else other tests will use the data produced here.
 }
 
 //	Trying to add 3 more igc files with the same method as last test
 func Test_successAddMultipleIgcFiles(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(handlerIgc))
+	server := httptest.NewServer(http.HandlerFunc(trackHandler))
 	defer server.Close()
 
 	igcJSON := "{ \"url\": \"http://skypolaris.org/wp-content/uploads/IGS%20Files/Boavista%20Medellin.igc\"}"
@@ -139,12 +143,12 @@ func Test_successAddMultipleIgcFiles(t *testing.T) {
 	if len(testIgcMap) != 3 {
 		t.Errorf("Expected an array length of 3, got %d", len(testIgcMap))
 	}
-	resetTest() // This is necessary or else other tests will use the data produced here.
+	// resetTest() // This is necessary or else other tests will use the data produced here.
 }
 
 // Try to request a single track
 func Test_TrackRequest(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(handlerIgc))
+	server := httptest.NewServer(http.HandlerFunc(trackHandler))
 	defer server.Close()
 
 	// Check if error returned when <id> does not exist
@@ -157,8 +161,8 @@ func Test_TrackRequest(t *testing.T) {
 	// Test if we can get the track with id0
 	resp = tryJSONGet(server.URL+"/igcinfo/api/igc/id0", http.StatusOK, t)
 
-	var respTrack TrackMetaInfo
-	var newTrack TrackMetaInfo
+	var respTrack TrackMetaData
+	var newTrack TrackMetaData
 
 	// Decode the track we got
 	err := json.NewDecoder(resp.Body).Decode(&respTrack)
@@ -173,7 +177,7 @@ func Test_TrackRequest(t *testing.T) {
 		t.Error("Error trying to parse a track, " + err.Error())
 		return
 	}
-	newTrack = createMetaTrack(track)
+	newTrack = createTrack(track, "http://skypolaris.org/wp-content/uploads/IGS%20Files/Boavista%20Medellin.igc")
 
 	// Compare results
 	if respTrack.Glider != newTrack.Glider || respTrack.GliderID != newTrack.GliderID ||
@@ -181,12 +185,12 @@ func Test_TrackRequest(t *testing.T) {
 		respTrack.TrackLength != newTrack.TrackLength {
 		t.Errorf("The results in the response are different than the actual track object, " + err.Error())
 	}
-	resetTest()
+	// resetTest()
 }
 
 // For GET /api/igc<id>/<field> as well
 func Test_TrackFieldRequest(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(handlerIgc))
+	server := httptest.NewServer(http.HandlerFunc(trackHandler))
 	defer server.Close()
 
 	// Add a track
@@ -208,5 +212,5 @@ func Test_TrackFieldRequest(t *testing.T) {
 	for _, field := range testFields {
 		tryJSONGet(server.URL+"/igcinfo/api/igc/id0/"+field, http.StatusOK, t)
 	}
-	resetTest()
+	// resetTest()
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -24,9 +25,37 @@ func main() {
 	// 	log.Fatal(err)
 	// }
 
-	http.HandleFunc("/igcinfo/api/", handlerIgc)
+	// Run configuration
+	configure()
+
+	// Start a connection to our global database
+	globalDB = TrackMongoDB{
+		config.DBURL,
+		config.DBName,
+		config.DBCollectionName,
+	}
+	globalDB.Init()
+
+	http.HandleFunc("/paragliding/", generalHandler) // general_api.go
+	http.HandleFunc("/paragliding/api/", forwardingHandler)
 	uptime = time.Now() // Start timer
 	if err := http.ListenAndServe( /*add*/ ":8080", nil); err != nil {
 		panic(err)
+	}
+}
+
+// This functions is to forward the URL to the correct files and functions
+func forwardingHandler(w http.ResponseWriter, r *http.Request) {
+	parts := strings.Split(r.URL.Path, "/")            //	parts[1]="paragliding", parts[2]="api"
+	w.Header().Set("Content-Type", "application/json") // Default header type
+
+	if parts[3] == "" { // general_api.go
+		generalHandler(w, r)
+	} else if parts[3] == "track" { // track_api.go
+		trackHandler(w, r)
+	} else if parts[3] == "ticker" { // ticker_api.go
+		tickerHandler(w, r)
+	} else if parts[3] == "webhook" { // webhook_api.go
+		webhookHandler(w, r)
 	}
 }
