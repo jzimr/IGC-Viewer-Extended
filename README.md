@@ -1,3 +1,10 @@
+#TODO
+* Fix test onRubbishRequest
+* Fix issue when two people are uploading tracks in the same second. (Unix time thingy)
+# 
+# 
+
+
 ![Scheme](logo.png)
 
 IGC Viewer is an online service that allows users to browse information about IGC files.
