@@ -1,6 +1,0 @@
-{
-    "db_url": "someURL",
-    "db_name": "someName",
-    "db_collection_name": "someCollection",
-    "max_tracks_per_page": 5
-}
