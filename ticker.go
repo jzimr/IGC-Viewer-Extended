@@ -39,13 +39,13 @@ func replyWithTicker(w http.ResponseWriter) {
 	var startStamp int64 = -1
 	var stopStamp int64 = -1
 
-	allTracks := globalDB.GetAll()
+	allTracks := trackGlobalDB.GetAll().([]TrackMetaData)
 	chosenTracks := make([]string, 0, MAX) // Create a new array of strings
 	for i := 0; i < len(allTracks); i++ {
 		if i >= MAX { //	We don't want more results than defined
 			break
 		}
-		chosenTracks = append(chosenTracks, allTracks[i].TrackID)
+		chosenTracks = append(chosenTracks, allTracks[i].ID)
 	}
 
 	// Choose the oldest and newest tracks from our list
@@ -80,7 +80,7 @@ func replyWithTimestamp(w http.ResponseWriter, fromStamp string) {
 
 	timer := startMillCounter()
 
-	allTracks := globalDB.GetAll()
+	allTracks := trackGlobalDB.GetAll().([]TrackMetaData)
 
 	// Find the first index where the timestamp is lower
 	var fromIndex int
@@ -93,7 +93,7 @@ func replyWithTimestamp(w http.ResponseWriter, fromStamp string) {
 	chosenTracks := make([]string, 0, MAX) // Create a new array of strings
 	for i := fromIndex; i < fromIndex+MAX; i++ {
 		if i < len(allTracks) {
-			chosenTracks = append(chosenTracks, allTracks[i].TrackID)
+			chosenTracks = append(chosenTracks, allTracks[i].ID)
 		} else {
 			break
 		}

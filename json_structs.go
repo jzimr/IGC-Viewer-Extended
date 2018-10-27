@@ -19,7 +19,7 @@ type RespondWithID struct {
 
 // TrackMetaData includes meta information about a particular track
 type TrackMetaData struct {
-	TrackID     string  `json:"track_id"`
+	ID          string  `json:"id"`
 	Hdate       string  `json:"H_date"`
 	Pilot       string  `json:"pilot"`
 	Glider      string  `json:"glider"`
@@ -46,4 +46,17 @@ type TickerInfo struct {
 	Stop       int64    `json:"t_stop"`
 	Tracks     []string `json:"tracks"`
 	Processing int64    `json:"processing"`
+}
+
+// WebhookRegistration contains the information of the new webhook the client wants to register
+type WebhookRegistration struct {
+	URL             string `json:"webhookURL"`
+	MinTriggerValue int    `json:"minTriggerValue"`
+}
+
+// WebhookData contains the information of the new webhook the client wants to register
+type WebhookData struct {
+	ID              string `json:"id"`
+	URL             string `json:"webhookURL"`
+	MinTriggerValue int    `json:"minTriggerValue"`
 }

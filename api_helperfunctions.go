@@ -36,11 +36,24 @@ func createTrack(track igc.Track, URL string) TrackMetaData {
 		trackDist += track.Points[i].Distance(track.Points[i+1])
 	}
 
-	newID := "id" + strconv.Itoa(globalDB.Count())
+	newID := "id" + strconv.Itoa(trackGlobalDB.Count())
 
 	trackData = TrackMetaData{newID, track.Date.String(), track.Pilot, track.GliderType, track.GliderID, trackDist, URL, getNow()}
 
 	return trackData
+}
+
+////////////////////////////////////////////////////////////////
+//	Function that converts a WebhookRegistration object to a
+//	WebhookData object
+////////////////////////////////////////////////////////////////
+func createWebhook(webhook WebhookRegistration) WebhookData {
+	var hookData WebhookData
+
+	newID := "id" + strconv.Itoa(webhookGlobalDB.Count())
+	hookData = WebhookData{newID, webhook.URL, webhook.MinTriggerValue}
+
+	return hookData
 }
 
 ////////////////////////////////////////////////////////////////
@@ -54,26 +67,27 @@ func getNow() int64 {
 //	Function that gets the last ID in database
 ////////////////////////////////////////////////////////////////
 func getLastID() string {
-	trackCount := globalDB.Count() - 1
+	trackCount := trackGlobalDB.Count() - 1
 
 	if trackCount < 0 { // If we don't have any tracks yet
 		return "-1"
 	}
 
-	return "id" + strconv.Itoa(globalDB.Count()-1)
+	return "id" + strconv.Itoa(trackGlobalDB.Count()-1)
 }
 
 ////////////////////////////////////////////////////////////////
 //	Function that returns the timestamp of the latest track added
 ////////////////////////////////////////////////////////////////
 func getLatestTimestamp() int64 {
-	latestTrack, ok := globalDB.Get(getLastID())
+	latestTrack, ok := trackGlobalDB.Get(getLastID())
+	latestTrack2 := latestTrack.(TrackMetaData)
 
 	if !ok {
 		return 0
 	}
 
-	return latestTrack.Timestamp
+	return latestTrack2.Timestamp
 }
 
 ////////////////////////////////////////////////////////////////

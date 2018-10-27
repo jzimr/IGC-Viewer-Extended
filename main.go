@@ -25,16 +25,8 @@ func main() {
 	// 	log.Fatal(err)
 	// }
 
-	// Run configuration
+	// Run configuration (E.g. initialize database connection)
 	configure()
-
-	// Start a connection to our global database
-	globalDB = TrackMongoDB{
-		config.DBURL,
-		config.DBName,
-		config.DBCollectionName,
-	}
-	globalDB.Init()
 
 	http.HandleFunc("/paragliding/", generalHandler) // general_api.go
 	http.HandleFunc("/paragliding/api/", forwardingHandler)

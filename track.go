@@ -35,10 +35,10 @@ func postNewTrack(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newTrack := createTrack(track, link.URL)
-	globalDB.Add(newTrack)
+	trackGlobalDB.Add(newTrack)
 
 	// Check if item was successfully added to database
-	_, ok := globalDB.Get(newTrack.TrackID)
+	_, ok := trackGlobalDB.Get(newTrack.ID)
 	if !ok {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -57,8 +57,8 @@ func replyWithID(w http.ResponseWriter) {
 //	What: returns the array of all track ids
 //	Response type: application/json
 func replyWithArray(w http.ResponseWriter) {
-	IDs := make([]string, 0, globalDB.Count()) // Create a new array of strings
-	for i := 0; i < globalDB.Count(); i++ {
+	IDs := make([]string, 0, trackGlobalDB.Count()) // Create a new array of strings
+	for i := 0; i < trackGlobalDB.Count(); i++ {
 		IDs = append(IDs, "id"+strconv.Itoa(i))
 	}
 	json.NewEncoder(w).Encode(IDs)
@@ -69,7 +69,8 @@ func replyWithArray(w http.ResponseWriter) {
 //	Response type: application/json
 func replyWithTrack(w http.ResponseWriter, ID string) {
 	// Check if ID == ok
-	track, ok := globalDB.Get(ID)
+	sTrack, ok := trackGlobalDB.Get(ID)
+	track := sTrack.(TrackMetaData)
 	if !ok {
 		http.Error(w, "The particular ID was not found", http.StatusNotFound)
 		return
@@ -85,7 +86,8 @@ func replyWithTrack(w http.ResponseWriter, ID string) {
 //	Response type: text/plain
 func replyWithTrackField(w http.ResponseWriter, ID string, field string) {
 	w.Header().Set("Content-Type", "text/plain") // The response type is text/plain so we set it as this
-	track, ok := globalDB.Get(ID)                // Try to get the ID requested by user
+	sTrack, ok := trackGlobalDB.Get(ID)          // Try to get the ID requested by user
+	track := sTrack.(TrackMetaData)
 	var value string
 
 	if !ok { // If ID was not found
