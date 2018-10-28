@@ -30,7 +30,8 @@ func main() {
 
 	http.HandleFunc("/paragliding/", generalHandler) // general_api.go
 	http.HandleFunc("/paragliding/api/", forwardingHandler)
-	uptime = time.Now() // Start timer
+	http.HandleFunc("/"+config.AdminRoot+"/", adminHandler) // The admin root is configured in "config.json"
+	uptime = time.Now()                                     // Start timer
 	if err := http.ListenAndServe( /*addr*/ ":8080", nil); err != nil {
 		panic(err)
 	}

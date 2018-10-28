@@ -15,6 +15,7 @@ type Config struct {
 	TrackDBCollectionName   string `json:"track_db_collection_name"`
 	WebhookDBCollectionName string `json:"webhook_db_collection_name"`
 	MaxTracksPerPage        int    `json:"max_tracks_per_page"`
+	AdminRoot               string `json:"admin_root"`
 }
 
 func configure() {

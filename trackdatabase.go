@@ -60,6 +60,21 @@ func (db *TrackMongoDB) Add(t TrackMetaData) {
 }
 
 /*
+DeleteAllTracks deletes all tracks in the database
+*/
+func (db *TrackMongoDB) DeleteAllTracks() error {
+	session, err := mgo.Dial(db.DatabaseURL)
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+
+	_, err = session.DB(db.DatabaseName).C(db.CollectionName).RemoveAll(nil)
+
+	return err
+}
+
+/*
 Count returns the number of items currently in our database
 */
 func (db *TrackMongoDB) Count() int {

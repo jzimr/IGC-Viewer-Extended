@@ -113,9 +113,6 @@ func replyWithTimestamp(w http.ResponseWriter, fromStamp string) {
 func tickerHandler(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(r.URL.Path, "/") //	parts[1]="paragliding", parts[2]="api"
 
-	fmt.Println(r.URL.Path)
-	fmt.Println(len(parts))
-
 	switch r.Method {
 	case "GET":
 		if len(parts) >= 4 && len(parts) < 6 {
