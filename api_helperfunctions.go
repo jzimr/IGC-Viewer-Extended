@@ -38,7 +38,7 @@ func createTrack(track igc.Track, URL string) TrackMetaData {
 
 	newID := "id" + strconv.Itoa(trackGlobalDB.Count())
 
-	trackData = TrackMetaData{newID, track.Date.String(), track.Pilot, track.GliderType, track.GliderID, trackDist, URL, getNow()}
+	trackData = TrackMetaData{newID, track.Date.String(), track.Pilot, track.GliderType, track.GliderID, trackDist, URL, time.Now().Unix()}
 
 	return trackData
 }
@@ -49,45 +49,34 @@ func createTrack(track igc.Track, URL string) TrackMetaData {
 ////////////////////////////////////////////////////////////////
 func createWebhook(webhook WebhookRegistration) WebhookData {
 	var hookData WebhookData
+	var newID string
 
-	newID := "id" + strconv.Itoa(webhookGlobalDB.Count())
-	hookData = WebhookData{newID, webhook.URL, webhook.MinTriggerValue}
+	latestHook := webhookGlobalDB.GetLatest()
+
+	// Assign a new ID
+	// If we have no hooks yet
+	if latestHook.ID == (WebhookData{}.ID) {
+		newID = "id0"
+	} else {
+		lastID, _ := strconv.Atoi(latestHook.ID[2:])
+		newID = "id" + strconv.Itoa(lastID+1)
+	}
+	hookData = WebhookData{newID, webhook.URL, webhook.MinTriggerValue, trackGlobalDB.Count() - 1}
 
 	return hookData
-}
-
-////////////////////////////////////////////////////////////////
-//	Function that returns the current UNIX time
-////////////////////////////////////////////////////////////////
-func getNow() int64 {
-	return time.Now().Unix()
-}
-
-////////////////////////////////////////////////////////////////
-//	Function that gets the last ID in database
-////////////////////////////////////////////////////////////////
-func getLastID() string {
-	trackCount := trackGlobalDB.Count() - 1
-
-	if trackCount < 0 { // If we don't have any tracks yet
-		return "-1"
-	}
-
-	return "id" + strconv.Itoa(trackGlobalDB.Count()-1)
 }
 
 ////////////////////////////////////////////////////////////////
 //	Function that returns the timestamp of the latest track added
 ////////////////////////////////////////////////////////////////
 func getLatestTimestamp() int64 {
-	latestTrack, ok := trackGlobalDB.Get(getLastID())
-	latestTrack2 := latestTrack.(TrackMetaData)
+	latestTrack := trackGlobalDB.GetLatest()
 
-	if !ok {
-		return 0
+	if latestTrack.ID == "" {
+		return -1
 	}
 
-	return latestTrack2.Timestamp
+	return latestTrack.Timestamp
 }
 
 ////////////////////////////////////////////////////////////////

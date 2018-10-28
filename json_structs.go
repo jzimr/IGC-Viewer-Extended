@@ -59,4 +59,10 @@ type WebhookData struct {
 	ID              string `json:"id"`
 	URL             string `json:"webhookURL"`
 	MinTriggerValue int    `json:"minTriggerValue"`
+	CountFromTrack  int    `json:"countFromTrack"`
+}
+
+// PostDiscordWebhook contains the message we want to send to the discord webhook
+type PostDiscordWebhook struct {
+	Content string `json:"content"`
 }

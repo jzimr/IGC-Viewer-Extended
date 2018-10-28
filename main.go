@@ -47,7 +47,7 @@ func forwardingHandler(w http.ResponseWriter, r *http.Request) {
 		trackHandler(w, r)
 	} else if parts[3] == "ticker" { // ticker_api.go
 		tickerHandler(w, r)
-	} else if parts[3] == "webhook" { // webhook_api.go
+	} else if parts[3] == "webhook" && parts[4] == "new_track" { // webhook_api.go
 		webhookHandler(w, r)
 	}
 }

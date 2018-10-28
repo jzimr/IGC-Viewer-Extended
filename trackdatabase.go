@@ -8,11 +8,10 @@ import (
 	mgo "gopkg.in/mgo.v2"
 )
 
-var trackGlobalDB MongoDB
-var webhookGlobalDB MongoDB
+var trackGlobalDB TrackMongoDB
 
 // MongoDB stores the information of the DB connection
-type MongoDB struct {
+type TrackMongoDB struct {
 	DatabaseURL    string
 	DatabaseName   string
 	CollectionName string
@@ -21,7 +20,7 @@ type MongoDB struct {
 /*
 Init initializes the mongo storage
 */
-func (db *MongoDB) Init() MongoDB {
+func (db *TrackMongoDB) Init() TrackMongoDB {
 	session, err := mgo.Dial(db.DatabaseURL)
 	if err != nil {
 		fmt.Println(err)
@@ -45,9 +44,9 @@ func (db *MongoDB) Init() MongoDB {
 }
 
 /*
-Add adds a new track to the storage
+Add adds a new item to the storage
 */
-func (db *MongoDB) Add(t interface{}) {
+func (db *TrackMongoDB) Add(t TrackMetaData) {
 	session, err := mgo.Dial(db.DatabaseURL)
 	if err != nil {
 		panic(err)
@@ -61,9 +60,9 @@ func (db *MongoDB) Add(t interface{}) {
 }
 
 /*
-Count returns the number of tracks currently in our database
+Count returns the number of items currently in our database
 */
-func (db *MongoDB) Count() int {
+func (db *TrackMongoDB) Count() int {
 	session, err := mgo.Dial(db.DatabaseURL)
 	if err != nil {
 		panic(err)
@@ -79,9 +78,9 @@ func (db *MongoDB) Count() int {
 }
 
 /*
-Get returns a track with a given ID or empty track struct
+Get returns an item with a given ID or empty item struct
 */
-func (db *MongoDB) Get(keyID string) (interface{}, bool) {
+func (db *TrackMongoDB) Get(keyID string) (TrackMetaData, bool) {
 	session, err := mgo.Dial(db.DatabaseURL)
 	if err != nil {
 		panic(err)
@@ -98,9 +97,9 @@ func (db *MongoDB) Get(keyID string) (interface{}, bool) {
 }
 
 /*
-GetAll returns all tracks
+GetAll returns all items in a collection
 */
-func (db *MongoDB) GetAll() interface{} {
+func (db *TrackMongoDB) GetAll() []TrackMetaData {
 	session, err := mgo.Dial(db.DatabaseURL)
 	if err != nil {
 		panic(err)
@@ -114,4 +113,22 @@ func (db *MongoDB) GetAll() interface{} {
 		return []TrackMetaData{}
 	}
 	return allTracks
+}
+
+/*
+GetLatest returns the latest added trak in the collection
+*/
+func (db *TrackMongoDB) GetLatest() TrackMetaData {
+	session, err := mgo.Dial(db.DatabaseURL)
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+
+	allTracks := db.GetAll()
+
+	if len(allTracks) == 0 {
+		return TrackMetaData{}
+	}
+	return allTracks[len(allTracks)-1]
 }

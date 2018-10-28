@@ -31,7 +31,7 @@ func configure() {
 
 func startDatabases() {
 	// Start a connection to our track global database
-	trackGlobalDB = MongoDB{
+	trackGlobalDB = TrackMongoDB{
 		config.DBURL,
 		config.DBName,
 		config.TrackDBCollectionName,
@@ -39,7 +39,7 @@ func startDatabases() {
 	trackGlobalDB = trackGlobalDB.Init()
 
 	// Start a connection to our webhook global database
-	webhookGlobalDB = MongoDB{
+	webhookGlobalDB = WebhookMongoDB{
 		config.DBURL,
 		config.DBName,
 		config.WebhookDBCollectionName,

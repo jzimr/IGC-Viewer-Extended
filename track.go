@@ -40,18 +40,14 @@ func postNewTrack(w http.ResponseWriter, r *http.Request) {
 	// Check if item was successfully added to database
 	_, ok := trackGlobalDB.Get(newTrack.ID)
 	if !ok {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Track could not be added to DB", http.StatusInternalServerError)
 		return
 	}
 	// Everything went gucci, so we reply with the ID in JSON format
-	replyWithID(w)
-}
+	json.NewEncoder(w).Encode(newTrack.ID)
 
-//	What: the ID assigned to the track that was registered
-//	Response type: application/json
-func replyWithID(w http.ResponseWriter) {
-	ID := RespondWithID{getLastID()}
-	json.NewEncoder(w).Encode(ID)
+	// Invoke webhooks
+	invokeWebhook(w)
 }
 
 //	What: returns the array of all track ids
@@ -69,8 +65,7 @@ func replyWithArray(w http.ResponseWriter) {
 //	Response type: application/json
 func replyWithTrack(w http.ResponseWriter, ID string) {
 	// Check if ID == ok
-	sTrack, ok := trackGlobalDB.Get(ID)
-	track := sTrack.(TrackMetaData)
+	track, ok := trackGlobalDB.Get(ID)
 	if !ok {
 		http.Error(w, "The particular ID was not found", http.StatusNotFound)
 		return
@@ -86,8 +81,7 @@ func replyWithTrack(w http.ResponseWriter, ID string) {
 //	Response type: text/plain
 func replyWithTrackField(w http.ResponseWriter, ID string, field string) {
 	w.Header().Set("Content-Type", "text/plain") // The response type is text/plain so we set it as this
-	sTrack, ok := trackGlobalDB.Get(ID)          // Try to get the ID requested by user
-	track := sTrack.(TrackMetaData)
+	track, ok := trackGlobalDB.Get(ID)           // Try to get the ID requested by user
 	var value string
 
 	if !ok { // If ID was not found

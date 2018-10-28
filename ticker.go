@@ -8,10 +8,6 @@ import (
 	"strings"
 )
 
-//	Timestamp storage how to solve?!
-//	Solution 1: If two concurrent requests
-//	Solution 2:
-
 //	What: returns the timestamp of the latest added track
 //	Response type: text/plain
 func replyWithLatest(w http.ResponseWriter) {
@@ -20,8 +16,8 @@ func replyWithLatest(w http.ResponseWriter) {
 
 	lTimestamp := getLatestTimestamp()
 
-	if lTimestamp == 0 {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+	if lTimestamp == -1 {
+		http.Error(w, "No latest tracks yet", http.StatusInternalServerError)
 		return
 	}
 	fmt.Fprintln(w, lTimestamp)
@@ -39,7 +35,7 @@ func replyWithTicker(w http.ResponseWriter) {
 	var startStamp int64 = -1
 	var stopStamp int64 = -1
 
-	allTracks := trackGlobalDB.GetAll().([]TrackMetaData)
+	allTracks := trackGlobalDB.GetAll()
 	chosenTracks := make([]string, 0, MAX) // Create a new array of strings
 	for i := 0; i < len(allTracks); i++ {
 		if i >= MAX { //	We don't want more results than defined
@@ -80,7 +76,7 @@ func replyWithTimestamp(w http.ResponseWriter, fromStamp string) {
 
 	timer := startMillCounter()
 
-	allTracks := trackGlobalDB.GetAll().([]TrackMetaData)
+	allTracks := trackGlobalDB.GetAll()
 
 	// Find the first index where the timestamp is lower
 	var fromIndex int
