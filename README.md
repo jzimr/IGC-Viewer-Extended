@@ -1,37 +1,26 @@
-#TODO
-* Fix test onRubbishRequest
-* Fix issue when two people are uploading tracks in the same second. (Unix time thingy)
-# 
-# 
-
 
 ![Scheme](logo.png)
 
-IGC Viewer is an online service that allows users to browse information about IGC files.
+IGC Viewer Extended is an online service that allows users to browse information about IGC files.
 
-## Author
+# Author
 Jan Zimmer (janzim, 493594)
 
-### Link to heroku
-[http://igcviewer.herokuapp.com/igcinfo](http://igcviewer.herokuapp.com/igcinfo)
+# Links
+Heroku app: [http://igcviewer-extended.herokuapp.com/paragliding/api](http://igcviewer-extended.herokuapp.com/paragliding/api)  
+Discord Webhook: [https://discordapp.com/api/webhooks/505722994237374466/6yqNRGY1b8jitN_jyhHxLhGc-xThQBqW3L0-xC-X86Hrd__Zi_eMAGki87lv5xzbY2IQ](https://discordapp.com/api/webhooks/505722994237374466/6yqNRGY1b8jitN_jyhHxLhGc-xThQBqW3L0-xC-X86Hrd__Zi_eMAGki87lv5xzbY2IQ)  
+Discord Channel (For Clock Trigger): [https://discord.gg/n9T2Qjr](https://discord.gg/n9T2Qjr)
 
-## Features
-* Get meta information about the API
+# Configuration of API
+Both the *main* API and the *Clock Trigger* have a *config.json* configuration file where the administrator can set the database information, how many tracks are shown  
+per page, the root for admin API and webhook URL.
 
-`GET /api`
+# Thoughts and execution of task
+Uniqueness of timestamp = The timestamp in the application is currently not unique if two people upload in the same second.
 
-* Track registration
+Clock Trigger = Hosted on openstack and located in the *Clock Trigger* folder where it can be executed independent from the main API
 
-`POST /api/igc`
 
-* Returns the array of all tracks ids
 
-`GET /api/igc`
 
-* Returns the meta information about a given track with the provided id, or NOT FOUND response code with an empty body.
 
-`GET /api/igc/<id>`
-
-* Returns the single detailed meta information about a given track with the provided id, or NOT FOUND response code with an empty body. The response should always be a string, with the exception of the calculated track length, that should be a number.
-
-`GET /api/igc/<id>/<field>`
