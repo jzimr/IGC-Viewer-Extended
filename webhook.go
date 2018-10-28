@@ -48,7 +48,7 @@ func registerNewWebhook(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//	What: the ID assigned to the track that was registered
+//	What: Goes through all webhooks and if applicable, POST tracks to the webhook
 //	Response type: application/json
 func invokeWebhook(w http.ResponseWriter) {
 	webhooks := webhookGlobalDB.GetAll()

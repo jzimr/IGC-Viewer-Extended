@@ -10,7 +10,7 @@ import (
 
 var trackGlobalDB TrackMongoDB
 
-// MongoDB stores the information of the DB connection
+// TrackMongoDB stores the information of the DB connection
 type TrackMongoDB struct {
 	DatabaseURL    string
 	DatabaseName   string

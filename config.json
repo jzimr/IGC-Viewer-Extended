@@ -1,0 +1,7 @@
+{
+    "db_url": "mongodb://igc-app:application123@ds237373.mlab.com:37373/igcviewer-extended-db",
+    "db_name": "igcviewer-extended-db",
+    "track_db_collection_name": "tracks",
+    "webhook_db_collection_name": "webhooks",
+    "max_tracks_per_page": 5 
+}
