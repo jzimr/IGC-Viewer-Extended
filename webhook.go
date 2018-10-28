@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-// var webhook = "https://discordapp.com/api/webhooks/505722994237374466/6yqNRGY1b8jitN_jyhHxLhGc-xThQBqW3L0-xC-X86Hrd__Zi_eMAGki87lv5xzbY2IQ"
-
 //	What: Registration of new webhook for notifications about tracks being added to the system.
 //	Response type: application/json
 func registerNewWebhook(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +16,7 @@ func registerNewWebhook(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&hook)
 
 	if err != nil {
-		http.Error(w, "Invalid json, "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Malformed JSON body, "+err.Error(), http.StatusBadRequest)
 		return
 	}
 	if hook.URL == "" { // We don't allow empty URLs
@@ -44,7 +42,11 @@ func registerNewWebhook(w http.ResponseWriter, r *http.Request) {
 	// Everything went gucci, so we reply with the ID
 	w.Header().Set("Content-Type", "text/plain") // Set header type to text/plain
 	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintln(w, newhook.ID)
+
+	_, err = fmt.Fprintln(w, newhook.ID)
+	if err != nil {
+		http.Error(w, "Could not print value, "+err.Error(), http.StatusInternalServerError)
+	}
 
 }
 
@@ -76,7 +78,11 @@ func invokeWebhook(w http.ResponseWriter) {
 				fmt.Println(err)
 				return
 			}
-			http.Post(hook.URL, "application/json", strings.NewReader(string(b)))
+			_, err = http.Post(hook.URL, "application/json", strings.NewReader(string(b)))
+
+			if err != nil {
+				http.Error(w, "Could not POST data to webhook, "+err.Error(), http.StatusInternalServerError)
+			}
 		}
 	}
 }
@@ -92,7 +98,11 @@ func accessWebhook(w http.ResponseWriter, webhookID string) {
 	}
 
 	webhookInfo := WebhookRegistration{webhook.ID, webhook.MinTriggerValue}
-	json.NewEncoder(w).Encode(webhookInfo)
+
+	err := json.NewEncoder(w).Encode(webhookInfo)
+	if err != nil {
+		http.Error(w, "Could not encode json, "+err.Error(), http.StatusInternalServerError)
+	}
 }
 
 //	What: Deleting registered webhooks.
@@ -112,7 +122,10 @@ func deleteWebhook(w http.ResponseWriter, webhookID string) {
 		http.Error(w, "Could not delete webhook, are you sure it exists?", http.StatusBadRequest)
 	}
 
-	json.NewEncoder(w).Encode(webhookInfo)
+	err := json.NewEncoder(w).Encode(webhookInfo)
+	if err != nil {
+		http.Error(w, "Could not encode json, "+err.Error(), http.StatusInternalServerError)
+	}
 
 }
 

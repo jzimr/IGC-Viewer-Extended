@@ -10,7 +10,11 @@ import (
 //	Response type: application/json
 func replyWithServiceInfo(w http.ResponseWriter) {
 	metaInfo := MetaInfo{Uptime: getUptime(), Info: "Service for IGC tracks.", Version: "v1"}
-	json.NewEncoder(w).Encode(metaInfo)
+
+	err := json.NewEncoder(w).Encode(metaInfo)
+	if err != nil {
+		http.Error(w, "Could not encode json, "+err.Error(), http.StatusInternalServerError)
+	}
 }
 
 // Handles GET request for /api

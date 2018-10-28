@@ -7,7 +7,10 @@ import (
 )
 
 func getDBRecords(w http.ResponseWriter) {
-	fmt.Fprintln(w, trackGlobalDB.Count())
+	_, err := fmt.Fprintln(w, trackGlobalDB.Count())
+	if err != nil {
+		http.Error(w, "Could not print database record count, "+err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func deleteDBRecords(w http.ResponseWriter) {
@@ -15,11 +18,15 @@ func deleteDBRecords(w http.ResponseWriter) {
 	err := trackGlobalDB.DeleteAllTracks()
 
 	if err != nil {
-		fmt.Fprintln(w, "Error when trying to delete tracks, "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Error when trying to delete tracks, "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Fprintln(w, tracksDeleted)
+	_, err = fmt.Fprintln(w, tracksDeleted)
+	if err != nil {
+		http.Error(w, "Could not print value, "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func adminHandler(w http.ResponseWriter, r *http.Request) {

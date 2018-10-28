@@ -44,7 +44,10 @@ func postNewTrack(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Everything went gucci, so we reply with the ID in JSON format
-	json.NewEncoder(w).Encode(newTrack.ID)
+	err = json.NewEncoder(w).Encode(newTrack.ID)
+	if err != nil {
+		http.Error(w, "Could not encode json, "+err.Error(), http.StatusInternalServerError)
+	}
 
 	// Invoke webhooks
 	invokeWebhook(w)
@@ -57,7 +60,10 @@ func replyWithArray(w http.ResponseWriter) {
 	for i := 0; i < trackGlobalDB.Count(); i++ {
 		IDs = append(IDs, "id"+strconv.Itoa(i))
 	}
-	json.NewEncoder(w).Encode(IDs)
+	err := json.NewEncoder(w).Encode(IDs)
+	if err != nil {
+		http.Error(w, "Could not encode json, "+err.Error(), http.StatusInternalServerError)
+	}
 }
 
 //	What: returns the meta information about a given track with the provided <id>,
@@ -72,7 +78,10 @@ func replyWithTrack(w http.ResponseWriter, ID string) {
 	}
 	metaDataView := TrackMetaDataView{track.Hdate, track.Pilot, track.Glider, track.GliderID, track.TrackLength, track.TrackSrcURL}
 	// Create JSON of track meta info and return
-	json.NewEncoder(w).Encode(metaDataView)
+	err := json.NewEncoder(w).Encode(metaDataView)
+	if err != nil {
+		http.Error(w, "Could not encode json, "+err.Error(), http.StatusInternalServerError)
+	}
 }
 
 //	What: returns the single detailed meta information about a given track with the provided <id>,
@@ -88,33 +97,32 @@ func replyWithTrackField(w http.ResponseWriter, ID string, field string) {
 		http.Error(w, "The particular ID was not found", http.StatusNotFound)
 		return
 	}
+	var err error
 
 	// Find the field and set the value of "value"
 	switch field {
 	case "pilot":
 		value = track.Pilot
-		break
 	case "glider":
 		value = track.Glider
-		break
 	case "glider_id":
 		value = track.GliderID
-		break
 	case "track_length":
-		fmt.Fprintln(w, track.TrackLength)
-		break
+		_, err = fmt.Fprintln(w, track.TrackLength)
 	case "H_date":
 		value = track.Hdate
-		break
 	case "track_src_url":
 		value = track.TrackSrcURL
 	default:
 		http.Error(w, "Not a valid <field> in the URL", http.StatusNotFound)
 		return
 	}
-
 	if field != "track_length" {
-		fmt.Fprintln(w, value)
+		_, err = fmt.Fprintln(w, value)
+	}
+
+	if err != nil {
+		http.Error(w, "Could not print data, "+err.Error(), http.StatusInternalServerError)
 	}
 }
 

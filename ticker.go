@@ -20,7 +20,10 @@ func replyWithLatest(w http.ResponseWriter) {
 		http.Error(w, "No latest tracks yet", http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintln(w, lTimestamp)
+	_, err := fmt.Fprintln(w, lTimestamp)
+	if err != nil {
+		http.Error(w, "Some error occured, "+err.Error(), http.StatusInternalServerError)
+	}
 }
 
 //	What: returns the JSON struct representing the ticker for the IGC tracks. The first track
@@ -40,8 +43,13 @@ func replyWithTicker(w http.ResponseWriter) {
 	// Return empty if database has no data
 	if len(allTracks) == 0 {
 		emptyTickerInfo := TickerInfo{}
-		emptyTickerInfo.Tracks = make([]string, 0, 0)
-		json.NewEncoder(w).Encode(emptyTickerInfo)
+		emptyTickerInfo.Tracks = make([]string, 0)
+		err := json.NewEncoder(w).Encode(emptyTickerInfo)
+
+		if err != nil {
+			http.Error(w, "Could not encode json, "+err.Error(), http.StatusInternalServerError)
+		}
+
 		return
 	}
 
@@ -66,7 +74,11 @@ func replyWithTicker(w http.ResponseWriter) {
 	tInfo := TickerInfo{getLatestTimestamp(), startStamp, stopStamp,
 		chosenTracks, stopMillCounter(timer)}
 
-	json.NewEncoder(w).Encode(tInfo)
+	err := json.NewEncoder(w).Encode(tInfo)
+
+	if err != nil {
+		http.Error(w, "Could not encode json, "+err.Error(), http.StatusInternalServerError)
+	}
 }
 
 // 	What: returns the JSON struct representing the ticker for the IGC tracks. The first returned
@@ -107,7 +119,11 @@ func replyWithTimestamp(w http.ResponseWriter, fromStamp string) {
 	tInfo := TickerInfo{getLatestTimestamp(), allTracks[0].Timestamp, allTracks[MAX-1].Timestamp,
 		chosenTracks, stopMillCounter(timer)}
 
-	json.NewEncoder(w).Encode(tInfo)
+	err = json.NewEncoder(w).Encode(tInfo)
+
+	if err != nil {
+		http.Error(w, "Could not encode json, "+err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func tickerHandler(w http.ResponseWriter, r *http.Request) {

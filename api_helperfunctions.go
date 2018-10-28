@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -58,7 +59,10 @@ func createWebhook(webhook WebhookRegistration) WebhookData {
 	if latestHook.ID == (WebhookData{}.ID) {
 		newID = "id0"
 	} else {
-		lastID, _ := strconv.Atoi(latestHook.ID[2:])
+		lastID, err := strconv.Atoi(latestHook.ID[2:])
+		if err != nil {
+			_ = fmt.Errorf("Could not convert integer to string, " + err.Error())
+		}
 		newID = "id" + strconv.Itoa(lastID+1)
 	}
 	hookData = WebhookData{newID, webhook.URL, webhook.MinTriggerValue, trackGlobalDB.Count() - 1}
