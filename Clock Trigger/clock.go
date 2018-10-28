@@ -13,7 +13,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-var webhook = "https://hooks.slack.com/services/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"
+var webhook = "https://discordapp.com/api/webhooks/505722994237374466/6yqNRGY1b8jitN_jyhHxLhGc-xThQBqW3L0-xC-X86Hrd__Zi_eMAGki87lv5xzbY2IQ"
 var config Config
 var globalDB MongoDB
 
@@ -49,20 +49,20 @@ func newTracksSinceLastCheck(trackCount int) []TrackMetaData {
 func invokeWebhook(tracks []TrackMetaData) {
 	startTimer := time.Now()
 
-	var sHook PostSlackWebhook
+	var dHook PostDiscordWebhook
 	latestTrack := tracks[len(tracks)-1]
 
-	sHook.Text = "Latest timestamp: " + strconv.FormatInt(latestTrack.Timestamp, 10) +
+	dHook.Content = "Latest timestamp: " + strconv.FormatInt(latestTrack.Timestamp, 10) +
 		", " + strconv.Itoa(len(tracks)) + " new tracks: "
 
 	for _, t := range tracks {
-		sHook.Text += t.ID + ", "
+		dHook.Content += t.ID + ", "
 	}
 
 	endTimer := time.Since(startTimer).Nanoseconds() / int64(time.Millisecond)
-	sHook.Text += "Processing time: " + strconv.FormatInt(endTimer, 10) + "ms"
+	dHook.Content += "Processing time: " + strconv.FormatInt(endTimer, 10) + "ms"
 
-	b, err := json.Marshal(sHook)
+	b, err := json.Marshal(dHook)
 	if err != nil {
 		fmt.Println(err)
 		return

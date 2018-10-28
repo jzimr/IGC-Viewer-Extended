@@ -36,6 +36,15 @@ func replyWithTicker(w http.ResponseWriter) {
 	var stopStamp int64 = -1
 
 	allTracks := trackGlobalDB.GetAll()
+
+	// Return empty if database has no data
+	if len(allTracks) == 0 {
+		emptyTickerInfo := TickerInfo{}
+		emptyTickerInfo.Tracks = make([]string, 0, 0)
+		json.NewEncoder(w).Encode(emptyTickerInfo)
+		return
+	}
+
 	chosenTracks := make([]string, 0, MAX) // Create a new array of strings
 	for i := 0; i < len(allTracks); i++ {
 		if i >= MAX { //	We don't want more results than defined

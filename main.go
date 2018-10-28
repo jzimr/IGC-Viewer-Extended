@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -21,10 +20,10 @@ func determineListenAddress() (string, error) {
 }
 
 func main() {
-	addr, err := determineListenAddress()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// addr, err := determineListenAddress()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	// Run configuration (E.g. initialize database connection)
 	configure()
@@ -32,7 +31,7 @@ func main() {
 	http.HandleFunc("/paragliding/", generalHandler) // general_api.go
 	http.HandleFunc("/paragliding/api/", forwardingHandler)
 	uptime = time.Now() // Start timer
-	if err := http.ListenAndServe(addr /*":8080"*/, nil); err != nil {
+	if err := http.ListenAndServe( /*addr*/ ":8080", nil); err != nil {
 		panic(err)
 	}
 }

@@ -7,9 +7,9 @@ type MongoDB struct {
 	CollectionName string
 }
 
-// PostSlackWebhook contains the message we want to send to the discord webhook
-type PostSlackWebhook struct {
-	Text string `json:"text"`
+// PostDiscordWebhook contains the message we want to send to the discord webhook
+type PostDiscordWebhook struct {
+	Content string `json:"content"`
 }
 
 // TrackMetaData includes meta information about a particular track
