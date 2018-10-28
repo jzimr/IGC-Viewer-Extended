@@ -5,19 +5,21 @@ import (
 )
 
 var interval = 10
+var processingTime time.Time
 
 func main() {
 	// Run configuration (Initialize database connection)
 	configure()
-	trackCount := globalDB.Count() - 1
+	trackCount := len(getAllTracks())
 
-	timer := time.Unix(time.Now().Unix()-700, 0)
+	timer := time.Now()
 
 	for {
 		time.Sleep(10 * time.Second)
 
 		// Has 10 minutes passed?
 		if itIsTime(timer) {
+			processingTime = time.Now() // Start our timer
 			newTracks := newTracksSinceLastCheck(trackCount)
 
 			// Do we have any new tracks?
@@ -28,7 +30,7 @@ func main() {
 
 			// reset
 			timer = time.Now()
-			trackCount = globalDB.Count()
+			trackCount = len(getAllTracks())
 		}
 	}
 }

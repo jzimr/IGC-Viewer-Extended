@@ -3,19 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
-
-	mgo "gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
-var webhook = "https://discordapp.com/api/webhooks/505722994237374466/6yqNRGY1b8jitN_jyhHxLhGc-xThQBqW3L0-xC-X86Hrd__Zi_eMAGki87lv5xzbY2IQ"
+var webhook string
 var config Config
-var globalDB MongoDB
 
 // itIsTime checks if 10 minutes has passed
 func itIsTime(timer time.Time) bool {
@@ -27,17 +24,30 @@ func itIsTime(timer time.Time) bool {
 
 // newTracksAdded returns all tracks that have been added since "timestamp"
 // returns empty array if no tracks have been added
-func newTracksSinceLastCheck(trackCount int) []TrackMetaData {
-	var newTracks []TrackMetaData
+func newTracksSinceLastCheck(trackCount int) []string {
+	var newTracks []string
+	allTracks := getAllTracks()
+	fmt.Println(len(allTracks))
 
-	if globalDB.Count() > trackCount {
-		tracks := globalDB.GetAll()
-
-		for i := trackCount; i < len(tracks); i++ {
-			newTracks = append(newTracks, tracks[i])
+	if len(allTracks) > trackCount {
+		for i := trackCount; i < len(allTracks); i++ {
+			newTracks = append(newTracks, allTracks[i])
 		}
 	}
 	return newTracks
+}
+
+func getAllTracks() []string {
+	var allTracks TracksResponse
+
+	resp, err := http.Get("https://igcviewer-extended.herokuapp.com/paragliding/api/track")
+	if err != nil {
+		fmt.Println("Error when trying to make the GET request, " + err.Error())
+	}
+	defer resp.Body.Close()
+	json.NewDecoder(resp.Body).Decode(&allTracks)
+
+	return allTracks
 }
 
 //////////////////////////////////////////////
@@ -46,22 +56,36 @@ func newTracksSinceLastCheck(trackCount int) []TrackMetaData {
 
 //	What: the ID assigned to the track that was registered
 //	Response type: application/json
-func invokeWebhook(tracks []TrackMetaData) {
-	startTimer := time.Now()
-
+func invokeWebhook(tracks []string) {
 	var dHook PostDiscordWebhook
-	latestTrack := tracks[len(tracks)-1]
 
-	dHook.Content = "Latest timestamp: " + strconv.FormatInt(latestTrack.Timestamp, 10) +
-		", " + strconv.Itoa(len(tracks)) + " new tracks: "
+	resp, err := http.Get("https://igcviewer-extended.herokuapp.com/paragliding/api/ticker/latest")
 
-	for _, t := range tracks {
-		dHook.Content += t.ID + ", "
+	if err != nil {
+		fmt.Println("Error when trying to make the GET request, " + err.Error())
+		return
+	}
+	defer resp.Body.Close()
+	responseData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Some error occured, " + err.Error())
+		return
 	}
 
-	endTimer := time.Since(startTimer).Nanoseconds() / int64(time.Millisecond)
-	dHook.Content += "Processing time: " + strconv.FormatInt(endTimer, 10) + "ms"
+	timestamp := strings.TrimSuffix(string(responseData), "\n")
 
+	// Form our Content
+	dHook.Content = "Latest timestamp: " + timestamp +
+		", " + strconv.Itoa(len(tracks)) + " new tracks: [ "
+
+	for _, t := range tracks {
+		dHook.Content += t + " "
+	}
+
+	endTimer := time.Since(processingTime).Nanoseconds() / int64(time.Millisecond)
+	dHook.Content += "]. Processing time: " + strconv.FormatInt(endTimer, 10) + "ms"
+
+	// Prepare POST request to webhook and send
 	b, err := json.Marshal(dHook)
 	if err != nil {
 		fmt.Println(err)
@@ -75,74 +99,7 @@ func invokeWebhook(tracks []TrackMetaData) {
 }
 
 //////////////////////////////////////////////
-// Database
-//////////////////////////////////////////////
-
-/*
-Init initializes the mongo storage
-*/
-func (db *MongoDB) Init() MongoDB {
-	session, err := mgo.Dial(db.DatabaseURL)
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
-	}
-	defer session.Close()
-
-	index := mgo.Index{
-		Key:        []string{"track_id"},
-		Unique:     true,
-		DropDups:   true,
-		Background: true,
-		Sparse:     true,
-	}
-
-	err = session.DB(db.DatabaseName).C(db.CollectionName).EnsureIndex(index)
-	if err != nil {
-		panic(err)
-	}
-	return *db
-}
-
-/*
-Count returns the number of items currently in our database
-*/
-func (db *MongoDB) Count() int {
-	session, err := mgo.Dial(db.DatabaseURL)
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
-
-	count, err := session.DB(db.DatabaseName).C(db.CollectionName).Count()
-	if err != nil {
-		fmt.Printf("error in Count(): %v", err.Error())
-		return -1
-	}
-	return count
-}
-
-/*
-GetAll returns all items in a collection
-*/
-func (db *MongoDB) GetAll() []TrackMetaData {
-	session, err := mgo.Dial(db.DatabaseURL)
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
-
-	var allTracks []TrackMetaData
-
-	err = session.DB(db.DatabaseName).C(db.CollectionName).Find(bson.M{}).All(&allTracks)
-	if err != nil {
-		return []TrackMetaData{}
-	}
-	return allTracks
-}
-
-//////////////////////////////////////////////
-// Configure database connection
+// Configure settings (E.g. webhook URL)
 //////////////////////////////////////////////
 
 func configure() {
@@ -155,11 +112,5 @@ func configure() {
 		fmt.Println("error:", err)
 	}
 
-	// Start a connection to our track global database
-	globalDB = MongoDB{
-		config.DBURL,
-		config.DBName,
-		config.TrackDBCollectionName,
-	}
-	globalDB = globalDB.Init()
+	webhook = config.WebhookURL
 }

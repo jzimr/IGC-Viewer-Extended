@@ -1,5 +1,3 @@
 {
-    "db_url": "mongodb://igc-app:application123@ds237373.mlab.com:37373/igcviewer-extended-db",
-    "db_name": "igcviewer-extended-db",
-    "track_db_collection_name": "tracks"
+    "webhook_url": "https://discordapp.com/api/webhooks/505722994237374466/6yqNRGY1b8jitN_jyhHxLhGc-xThQBqW3L0-xC-X86Hrd__Zi_eMAGki87lv5xzbY2IQ"
 }
