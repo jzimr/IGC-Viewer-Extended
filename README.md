@@ -18,7 +18,8 @@ per page, the root for admin API and webhook URL.
 # Thoughts and execution of task
 Uniqueness of timestamp = The timestamp in the application is currently not unique if two people upload in the same second.
 
-Clock Trigger = Hosted on openstack and located in the *Clock Trigger* folder where it can be executed independent from the main API
+Clock Trigger = Hosted on openstack and located in the *Clock Trigger* folder where it can be executed independent from the main API. I first developed it with direclty with
+the datrabase, but changed it later to connect to heroku as this felt more meaningful to the total task.
 
 
 
