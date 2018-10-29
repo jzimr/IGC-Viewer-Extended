@@ -24,17 +24,23 @@ func itIsTime(timer time.Time) bool {
 
 // newTracksAdded returns all tracks that have been added since "timestamp"
 // returns empty array if no tracks have been added
-func newTracksSinceLastCheck(trackCount int) []string {
-	var newTracks []string
+func changedTracksSinceLastCheck(trackCount int) []string {
+	var changedTracks []string
 	allTracks := getAllTracks()
-	fmt.Println(len(allTracks))
 
+	// If tracks were added
 	if len(allTracks) > trackCount {
 		for i := trackCount; i < len(allTracks); i++ {
-			newTracks = append(newTracks, allTracks[i])
+			changedTracks = append(changedTracks, allTracks[i])
+		}
+		// If tracks were removed
+	} else if len(allTracks) < trackCount {
+		for i := trackCount; i > len(allTracks); i-- {
+			changedTracks = append(changedTracks, allTracks[i])
 		}
 	}
-	return newTracks
+
+	return changedTracks
 }
 
 func getAllTracks() []string {
@@ -76,7 +82,7 @@ func invokeWebhook(tracks []string) {
 
 	// Form our Content
 	dHook.Content = "Latest timestamp: " + timestamp +
-		", " + strconv.Itoa(len(tracks)) + " new tracks: [ "
+		", " + strconv.Itoa(len(tracks)) + " new/deleted tracks: [ "
 
 	for _, t := range tracks {
 		dHook.Content += t + " "

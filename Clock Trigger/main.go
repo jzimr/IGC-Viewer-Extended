@@ -20,7 +20,7 @@ func main() {
 		// Has 10 minutes passed?
 		if itIsTime(timer) {
 			processingTime = time.Now() // Start our timer
-			newTracks := newTracksSinceLastCheck(trackCount)
+			newTracks := changedTracksSinceLastCheck(trackCount)
 
 			// Do we have any new tracks?
 			if len(newTracks) != 0 {

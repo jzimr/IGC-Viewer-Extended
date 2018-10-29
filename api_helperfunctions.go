@@ -37,7 +37,14 @@ func createTrack(track igc.Track, URL string) TrackMetaData {
 		trackDist += track.Points[i].Distance(track.Points[i+1])
 	}
 
-	newID := "id" + strconv.Itoa(trackGlobalDB.Count())
+	count := trackGlobalDB.Count()
+
+	// Fixes error where trackGlobalDB.Count() sometimes returns -1 for some reason
+	if count < 0 {
+		count = 0
+	}
+
+	newID := "id" + strconv.Itoa(count)
 
 	trackData = TrackMetaData{newID, track.Date.String(), track.Pilot, track.GliderType, track.GliderID, trackDist, URL, time.Now().Unix()}
 

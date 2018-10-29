@@ -4,8 +4,6 @@ import (
 	"testing"
 
 	"github.com/marni/goigc"
-
-	"gopkg.in/mgo.v2"
 )
 
 func setupDB(t *testing.T) *TrackMongoDB {
@@ -15,12 +13,7 @@ func setupDB(t *testing.T) *TrackMongoDB {
 		"tracks",
 	}
 
-	session, err := mgo.Dial(db.DatabaseURL)
-	defer session.Close()
-
-	if err != nil {
-		t.Error(err)
-	}
+	db = db.Init()
 	return &db
 }
 
@@ -30,11 +23,9 @@ func tearDownDB(t *testing.T, db *TrackMongoDB) {
 
 func Test_TrackMongoDBAdd(t *testing.T) {
 	db := setupDB(t)
-
-	db.Init()
+	db.DeleteAllTracks()
 
 	tr, err := igc.ParseLocation("http://skypolaris.org/wp-content/uploads/IGS%20Files/Boavista%20Medellin.igc")
-
 	if err != nil {
 		t.Error(err)
 	}
@@ -43,16 +34,41 @@ func Test_TrackMongoDBAdd(t *testing.T) {
 
 	db.Add(track)
 
-	// if db.Count() < 1 {
-	// 	t.Error("adding a new track failed")
-	// }
-
+	if db.Count() < 1 {
+		t.Error("adding a new track failed")
+	}
 }
 
-func Test_TrackMongoDBDelete(t *testing.T) {
+func Test_TrackMongoDBDeleteAll(t *testing.T) {
+	db := setupDB(t)
 
+	// We need something to delete
+	if db.Count() == 0 {
+		Test_TrackMongoDBAdd(t)
+		Test_TrackMongoDBAdd(t)
+	}
+
+	db.DeleteAllTracks()
+
+	if db.Count() != 0 {
+		t.Error("removing all tracks failed")
+	}
 }
 
 func Test_TrackMongoDBGet(t *testing.T) {
+	db := setupDB(t)
 
+	// We need something to delete
+	if db.Count() == 0 {
+		Test_TrackMongoDBAdd(t)
+	}
+
+	track, ok := db.Get("id0")
+
+	if !ok {
+		t.Error("Something went wrong when trying to retrieve track id0")
+	}
+	if track.ID != "id0" {
+		t.Error("We got a track, but not the one we wanted :(")
+	}
 }
