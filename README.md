@@ -15,11 +15,18 @@ Discord Channel (For Clock Trigger): [https://discord.gg/n9T2Qjr](https://discor
 Both the *main* API and the *Clock Trigger* have a *config.json* configuration file where the administrator can set the database information, how many tracks are shown  
 per page, the root for admin API and webhook URL.
 
-# Thoughts and execution of task
-Uniqueness of timestamp = The timestamp in the application is currently not unique if two people upload in the same second.
+# Choices and decisions
+**Uniqueness of timestamp** = The timestamp in the application is currently not unique if two people upload in the same second. However, unless we want to get a specific timestamp,
+this should not be an issue since they are all listed in an array upon calling the API endpoints.
 
-Clock Trigger = Hosted on openstack and located in the *Clock Trigger* folder where it can be executed independent from the main API. I first developed it with direclty with
-the datrabase, but changed it later to connect to heroku as this felt more meaningful to the total task.
+**Clock Trigger** = Hosted on openstack and located in the *Clock Trigger* folder where it can be executed independently from the main API. At first it communicated directly with
+the tracks in the database, but I changed this later on to connect to heroku as this felt more meaningful overall. 
+The clock trigger contains a *config.json* where the admin can change the webhook URL, as this makes it much easier to setup rather than hardcoding it into the source code.
+
+**Choice of webhooks** = I've chosen to only go with the Discord webhook as it is easier to check for messages and people can easily check the results by clicking the link for the
+Discord channel above.
+
+**Paging cap** = The paging cap (default=5) can be modified in the *config.json* by changing the value.
 
 
 
