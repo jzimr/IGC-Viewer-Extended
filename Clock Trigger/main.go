@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -11,6 +12,8 @@ func main() {
 	// Run configuration (Initialize database connection)
 	configure()
 	trackCount := len(getAllTracks())
+
+	fmt.Println("Running...")
 
 	timer := time.Now()
 

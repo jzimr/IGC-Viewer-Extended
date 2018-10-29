@@ -63,6 +63,8 @@ func getAllTracks() []string {
 //	What: the ID assigned to the track that was registered
 //	Response type: application/json
 func invokeWebhook(tracks []string) {
+	fmt.Println("Tracks have been added or removed!")
+
 	var dHook PostDiscordWebhook
 
 	resp, err := http.Get("https://igcviewer-extended.herokuapp.com/paragliding/api/ticker/latest")
