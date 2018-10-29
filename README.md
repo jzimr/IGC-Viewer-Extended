@@ -17,7 +17,7 @@ per page, the root for admin API and webhook URL.
 
 # Choices and decisions
 **Uniqueness of timestamp** = The timestamp in the application is currently not unique if two people upload in the same second. However, unless we want to get a specific timestamp,
-this does not matter since they are all listed in an array upon calling the API endpoints.
+this should not be an issue since they are all listed in an array upon calling the API endpoints.
 
 **Clock Trigger** = Hosted on openstack and located in the *Clock Trigger* folder where it can be executed independently from the main API. At first it communicated directly with
 the tracks in the database, but I changed this later on to connect to heroku as this felt more meaningful overall. 
