@@ -143,14 +143,14 @@ func Test_TrackRequest(t *testing.T) {
 	defer server.Close()
 
 	// Check if error returned when <id> does not exist
-	resp := tryJSONGet(server.URL+"/paragliding/api/track/id0", http.StatusNotFound, t)
+	tryJSONGet(server.URL+"/paragliding/api/track/id0", http.StatusNotFound, t)
 
 	//	Add track
 	igcJSON := "{ \"url\": \"http://skypolaris.org/wp-content/uploads/IGS%20Files/Boavista%20Medellin.igc\"}"
-	resp = tryJSONPost(server.URL+"/paragliding/api/track", igcJSON, http.StatusOK, t)
+	tryJSONPost(server.URL+"/paragliding/api/track", igcJSON, http.StatusOK, t)
 
 	// Test if we can get the track with id0
-	resp = tryJSONGet(server.URL+"/paragliding/api/track/id0", http.StatusOK, t)
+	resp := tryJSONGet(server.URL+"/paragliding/api/track/id0", http.StatusOK, t)
 
 	var respTrack TrackMetaData
 	var newTrack TrackMetaData

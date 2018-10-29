@@ -17,10 +17,6 @@ func setupDB(t *testing.T) *TrackMongoDB {
 	return &db
 }
 
-func tearDownDB(t *testing.T, db *TrackMongoDB) {
-
-}
-
 func Test_TrackMongoDBAdd(t *testing.T) {
 	db := setupDB(t)
 	db.DeleteAllTracks()
