@@ -23,12 +23,12 @@ func main() {
 		// Has 10 minutes passed?
 		if itIsTime(timer) {
 			processingTime = time.Now() // Start our timer
-			newTracks := changedTracksSinceLastCheck(trackCount)
+			changedTracks := changedTracksSinceLastCheck(trackCount)
 
 			// Do we have any new tracks?
-			if len(newTracks) != 0 {
+			if changedTracks != 0 {
 				// Send new tracks to slack webhook
-				invokeWebhook(newTracks)
+				invokeWebhook(changedTracks)
 			}
 
 			// reset

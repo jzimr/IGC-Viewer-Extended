@@ -24,23 +24,15 @@ func itIsTime(timer time.Time) bool {
 
 // newTracksAdded returns all tracks that have been added since "timestamp"
 // returns empty array if no tracks have been added
-func changedTracksSinceLastCheck(trackCount int) []string {
-	var changedTracks []string
-	allTracks := getAllTracks()
+func changedTracksSinceLastCheck(trackCount int) int {
+	allTracks := len(getAllTracks())
 
-	// If tracks were added
-	if len(allTracks) > trackCount {
-		for i := trackCount; i < len(allTracks); i++ {
-			changedTracks = append(changedTracks, allTracks[i])
-		}
-		// If tracks were removed
-	} else if len(allTracks) < trackCount {
-		for i := trackCount; i > len(allTracks); i-- {
-			changedTracks = append(changedTracks, allTracks[i])
-		}
+	difference := allTracks - trackCount
+	if difference < 0 {
+		difference = -difference
 	}
 
-	return changedTracks
+	return difference
 }
 
 func getAllTracks() []string {
@@ -62,7 +54,7 @@ func getAllTracks() []string {
 
 //	What: the ID assigned to the track that was registered
 //	Response type: application/json
-func invokeWebhook(tracks []string) {
+func invokeWebhook(changedTracks int) {
 	fmt.Println("Tracks have been added or removed!")
 
 	var dHook PostDiscordWebhook
@@ -84,14 +76,10 @@ func invokeWebhook(tracks []string) {
 
 	// Form our Content
 	dHook.Content = "Latest timestamp: " + timestamp +
-		", " + strconv.Itoa(len(tracks)) + " new/deleted tracks: [ "
-
-	for _, t := range tracks {
-		dHook.Content += t + " "
-	}
+		". " + strconv.Itoa(changedTracks) + " tracks have been modified. "
 
 	endTimer := time.Since(processingTime).Nanoseconds() / int64(time.Millisecond)
-	dHook.Content += "]. Processing time: " + strconv.FormatInt(endTimer, 10) + "ms"
+	dHook.Content += "Processing time: " + strconv.FormatInt(endTimer, 10) + "ms"
 
 	// Prepare POST request to webhook and send
 	b, err := json.Marshal(dHook)
