@@ -93,7 +93,7 @@ func accessWebhook(w http.ResponseWriter, webhookID string) {
 	webhook, ok := webhookGlobalDB.Get(webhookID)
 
 	if !ok {
-		http.Error(w, "ID not found", http.StatusBadRequest)
+		http.Error(w, "ID not found", http.StatusNotFound)
 		return
 	}
 
@@ -111,7 +111,7 @@ func deleteWebhook(w http.ResponseWriter, webhookID string) {
 	webhook, ok := webhookGlobalDB.Get(webhookID)
 
 	if !ok {
-		http.Error(w, "ID not found", http.StatusBadRequest)
+		http.Error(w, "ID not found", http.StatusNotFound)
 		return
 	}
 

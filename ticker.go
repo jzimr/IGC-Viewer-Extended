@@ -89,6 +89,7 @@ func replyWithTicker(w http.ResponseWriter) {
 //	Response type: application/json
 func replyWithTimestamp(w http.ResponseWriter, fromStamp string) {
 	timestamp, err := strconv.ParseInt(fromStamp, 10, 64)
+
 	MAX := config.MaxTracksPerPage
 
 	if err != nil {
@@ -104,7 +105,11 @@ func replyWithTimestamp(w http.ResponseWriter, fromStamp string) {
 	for i, track := range allTracks {
 		if timestamp < track.Timestamp {
 			fromIndex = i
+			break
 		}
+	}
+	if len(allTracks) < MAX {
+		MAX = len(allTracks) - fromIndex
 	}
 
 	chosenTracks := make([]string, 0, MAX) // Create a new array of strings
@@ -116,7 +121,7 @@ func replyWithTimestamp(w http.ResponseWriter, fromStamp string) {
 		}
 	}
 
-	tInfo := TickerInfo{getLatestTimestamp(), allTracks[0].Timestamp, allTracks[MAX-1].Timestamp,
+	tInfo := TickerInfo{getLatestTimestamp(), allTracks[fromIndex].Timestamp, allTracks[fromIndex+MAX-1].Timestamp,
 		chosenTracks, stopMillCounter(timer)}
 
 	err = json.NewEncoder(w).Encode(tInfo)

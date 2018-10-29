@@ -10,10 +10,6 @@ import (
 	igc "github.com/marni/goigc"
 )
 
-//	Store information on server
-//var trackMap = make(map[string]igc.Track)         // key: id (e.g. "id0", "id1", ...), value: igc.track object
-//var metaTrackMap = make(map[string]TrackMetaData) // key: id, value: MetaInfo object
-
 //	What: track registration
 //	Response type: application/json
 func postNewTrack(w http.ResponseWriter, r *http.Request) {
@@ -28,23 +24,21 @@ func postNewTrack(w http.ResponseWriter, r *http.Request) {
 	if !strings.Contains(link.URL, ".igc") {
 		http.Error(w, "Not a valid .igc file", http.StatusBadRequest)
 	}
+
+	// Convert link -> track
 	track, err := igc.ParseLocation(link.URL)
 	if err != nil { //	If parsing failed
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// Add Track to database
 	newTrack := createTrack(track, link.URL)
 	trackGlobalDB.Add(newTrack)
 
-	// Check if item was successfully added to database
-	_, ok := trackGlobalDB.Get(newTrack.ID)
-	if !ok {
-		http.Error(w, "Track could not be added to DB", http.StatusInternalServerError)
-		return
-	}
 	// Everything went gucci, so we reply with the ID in JSON format
-	err = json.NewEncoder(w).Encode(newTrack.ID)
+	ID := RespondWithID{newTrack.ID}
+	err = json.NewEncoder(w).Encode(ID)
 	if err != nil {
 		http.Error(w, "Could not encode json, "+err.Error(), http.StatusInternalServerError)
 	}

@@ -6,11 +6,6 @@ type PostDiscordWebhook struct {
 }
 
 // TracksResponse includes a list of track IDs
-// type TracksResponse struct {
-// 	Tracks []string
-// }
-
-// TracksResponse includes a list of track IDs
 type TracksResponse []string
 
 // Config is for the configuration of the database and other settings

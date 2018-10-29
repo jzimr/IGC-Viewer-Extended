@@ -10,12 +10,20 @@ import (
 //	Helper functions
 
 ////////////////////////////////////////////////////////////////
-/// Resets the map
+/// Clears all data in the database
 ////////////////////////////////////////////////////////////////
-// func resetTest() {
-// 	trackMap = make(map[string]igc.Track)
-// 	metaTrackMap = make(map[string]TrackMetaData)
-// }
+func resetTest() {
+	configure()
+
+	err := trackGlobalDB.DeleteAllTracks()
+	if err != nil {
+		panic(err)
+	}
+	err = webhookGlobalDB.DeleteAll()
+	if err != nil {
+		panic(err)
+	}
+}
 
 ////////////////////////////////////////////////////////////////
 /// Tries to do a POST request to the URL and checks for errors

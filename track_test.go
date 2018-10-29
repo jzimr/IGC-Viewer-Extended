@@ -15,24 +15,13 @@ func Test_errorRubbishRequest(t *testing.T) {
 	defer server.Close()
 
 	testUrls := []string{
-		server.URL + "/paragliding/",
 		server.URL + "/paragliding/rubbish",
 		server.URL + "/rubbish",
 		server.URL + "/paragliding/api/rubbish",
 	}
 
-	tryJSONGet(testUrls[0], http.StatusNotFound, t)
-	tryJSONGet(testUrls[1], http.StatusOK, t)
-
 	for _, testURL := range testUrls {
-		resp, err := http.Get(testURL)
-		if err != nil {
-			t.Errorf("Error when trying to make the GET request, %s", err)
-		}
-
-		if resp.StatusCode != http.StatusNotFound {
-			t.Errorf("Expected StatusCode %d, received %d", http.StatusNotFound, resp.StatusCode)
-		}
+		tryJSONGet(testURL, http.StatusNotFound, t)
 	}
 }
 
@@ -41,19 +30,20 @@ func Test_errorInvalidBodyPost(t *testing.T) {
 	defer server.Close()
 
 	// Test with empty body
-	tryJSONPost(server.URL+"/igcinfo/api/igc", "", http.StatusBadRequest, t)
+	tryJSONPost(server.URL+"/paragliding/api/track", "", http.StatusBadRequest, t)
 
 	// Test for malformed url with valid JSON body
 	igcJSON := "{ \"url\": \"http://skypolaris.org/wp-content/uploads/IGS%20Files/Boavista%20Medell\"}"
-	tryJSONPost(server.URL+"/igcinfo/api/igc", igcJSON, http.StatusBadRequest, t)
+	tryJSONPost(server.URL+"/paragliding/api/track", igcJSON, http.StatusBadRequest, t)
 }
 
 func Test_emptyArrayReturned(t *testing.T) {
+	resetTest()
 	server := httptest.NewServer(http.HandlerFunc(trackHandler))
 	defer server.Close()
 
-	// Check that GET /api/igc returns an empty array if no tracks stored
-	resp := tryJSONGet(server.URL+"/igcinfo/api/igc", http.StatusOK, t)
+	// Check that GET /api/track returns an empty array if no tracks stored
+	resp := tryJSONGet(server.URL+"/paragliding/api/track", http.StatusOK, t)
 
 	// Try to put the ids returned into an array
 	var testIgcMap []string
@@ -69,12 +59,13 @@ func Test_emptyArrayReturned(t *testing.T) {
 }
 
 func Test_successAddIgcFile(t *testing.T) {
+	resetTest()
 	server := httptest.NewServer(http.HandlerFunc(trackHandler))
 	defer server.Close()
 
 	// Test for valid url with valid JSON body
 	igcJSON := "{ \"url\": \"http://skypolaris.org/wp-content/uploads/IGS%20Files/Boavista%20Medellin.igc\"}"
-	resp := tryJSONPost(server.URL+"/igcinfo/api/igc", igcJSON, http.StatusOK, t)
+	resp := tryJSONPost(server.URL+"/paragliding/api/track", igcJSON, http.StatusOK, t)
 
 	// Check if assigned to "id0"
 	var responseID RespondWithID
@@ -88,7 +79,7 @@ func Test_successAddIgcFile(t *testing.T) {
 	}
 
 	// Check that GET /api/igc returns all ids in an array
-	resp = tryJSONGet(server.URL+"/igcinfo/api/igc", http.StatusOK, t)
+	resp = tryJSONGet(server.URL+"/paragliding/api/track", http.StatusOK, t)
 
 	var testIgcMap []string
 	err = json.NewDecoder(resp.Body).Decode(&testIgcMap)
@@ -99,20 +90,20 @@ func Test_successAddIgcFile(t *testing.T) {
 	if len(testIgcMap) != 1 {
 		t.Errorf("Expected an array length of 1, got %d", len(testIgcMap))
 	}
-	// resetTest() // This is necessary or else other tests will use the data produced here.
 }
 
-//	Trying to add 3 more igc files with the same method as last test
+//	Trying to add 2 more igc files with the same method as last test
 func Test_successAddMultipleIgcFiles(t *testing.T) {
+	resetTest()
 	server := httptest.NewServer(http.HandlerFunc(trackHandler))
 	defer server.Close()
 
 	igcJSON := "{ \"url\": \"http://skypolaris.org/wp-content/uploads/IGS%20Files/Boavista%20Medellin.igc\"}"
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 2; i++ {
 
 		//	Post the igc file to the server
-		resp := tryJSONPost(server.URL+"/igcinfo/api/igc", igcJSON, http.StatusOK, t)
+		resp := tryJSONPost(server.URL+"/paragliding/api/track", igcJSON, http.StatusOK, t)
 
 		// Decode the id received
 		var responseID RespondWithID
@@ -129,8 +120,8 @@ func Test_successAddMultipleIgcFiles(t *testing.T) {
 		}
 	}
 
-	// Check that GET /api/igc returns all ids in an array
-	resp := tryJSONGet(server.URL+"/igcinfo/api/igc", http.StatusOK, t)
+	// Check that GET api/track returns all ids in an array
+	resp := tryJSONGet(server.URL+"/paragliding/api/track", http.StatusOK, t)
 
 	// Try to put the ids returned into an array
 	var testIgcMap []string
@@ -139,27 +130,27 @@ func Test_successAddMultipleIgcFiles(t *testing.T) {
 		t.Errorf("Could not decode JSON returned, " + err.Error())
 	}
 
-	// Length of array should be 3
-	if len(testIgcMap) != 3 {
+	// Length of array should be 2
+	if len(testIgcMap) != 2 {
 		t.Errorf("Expected an array length of 3, got %d", len(testIgcMap))
 	}
-	// resetTest() // This is necessary or else other tests will use the data produced here.
 }
 
 // Try to request a single track
 func Test_TrackRequest(t *testing.T) {
+	resetTest()
 	server := httptest.NewServer(http.HandlerFunc(trackHandler))
 	defer server.Close()
 
 	// Check if error returned when <id> does not exist
-	resp := tryJSONGet(server.URL+"/igcinfo/api/igc/id0", http.StatusNotFound, t)
+	resp := tryJSONGet(server.URL+"/paragliding/api/track/id0", http.StatusNotFound, t)
 
 	//	Add track
 	igcJSON := "{ \"url\": \"http://skypolaris.org/wp-content/uploads/IGS%20Files/Boavista%20Medellin.igc\"}"
-	resp = tryJSONPost(server.URL+"/igcinfo/api/igc", igcJSON, http.StatusOK, t)
+	resp = tryJSONPost(server.URL+"/paragliding/api/track", igcJSON, http.StatusOK, t)
 
 	// Test if we can get the track with id0
-	resp = tryJSONGet(server.URL+"/igcinfo/api/igc/id0", http.StatusOK, t)
+	resp = tryJSONGet(server.URL+"/paragliding/api/track/id0", http.StatusOK, t)
 
 	var respTrack TrackMetaData
 	var newTrack TrackMetaData
@@ -185,20 +176,20 @@ func Test_TrackRequest(t *testing.T) {
 		respTrack.TrackLength != newTrack.TrackLength {
 		t.Errorf("The results in the response are different than the actual track object, " + err.Error())
 	}
-	// resetTest()
 }
 
-// For GET /api/igc<id>/<field> as well
+// For GET api/track/<id>/<field> as well
 func Test_TrackFieldRequest(t *testing.T) {
+	resetTest()
 	server := httptest.NewServer(http.HandlerFunc(trackHandler))
 	defer server.Close()
 
 	// Add a track
 	igcJSON := "{ \"url\": \"http://skypolaris.org/wp-content/uploads/IGS%20Files/Boavista%20Medellin.igc\"}"
-	tryJSONPost(server.URL+"/igcinfo/api/igc", igcJSON, http.StatusOK, t)
+	tryJSONPost(server.URL+"/paragliding/api/track", igcJSON, http.StatusOK, t)
 
 	// Check for error if <field> does not exist
-	tryJSONGet(server.URL+"/igcinfo/api/igc/id0/distance", http.StatusNotFound, t)
+	tryJSONGet(server.URL+"/paragliding/api/track/id0/distance", http.StatusNotFound, t)
 
 	testFields := []string{
 		"pilot",
@@ -210,7 +201,6 @@ func Test_TrackFieldRequest(t *testing.T) {
 
 	// Check if all field requests return 200 OK and the correct data
 	for _, field := range testFields {
-		tryJSONGet(server.URL+"/igcinfo/api/igc/id0/"+field, http.StatusOK, t)
+		tryJSONGet(server.URL+"/paragliding/api/track/id0/"+field, http.StatusOK, t)
 	}
-	// resetTest()
 }

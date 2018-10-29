@@ -8,7 +8,7 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-func initDB(t *testing.T) *TrackMongoDB {
+func setupDB(t *testing.T) *TrackMongoDB {
 	db := TrackMongoDB{
 		"mongodb://igc-app:application123@ds237373.mlab.com:37373/igcviewer-extended-db",
 		"igcviewer-extended-db",
@@ -24,8 +24,12 @@ func initDB(t *testing.T) *TrackMongoDB {
 	return &db
 }
 
-func TestTrackMongoDB_Add(t *testing.T) {
-	db := initDB(t)
+func tearDownDB(t *testing.T, db *TrackMongoDB) {
+
+}
+
+func Test_TrackMongoDBAdd(t *testing.T) {
+	db := setupDB(t)
 
 	db.Init()
 
@@ -42,5 +46,13 @@ func TestTrackMongoDB_Add(t *testing.T) {
 	// if db.Count() < 1 {
 	// 	t.Error("adding a new track failed")
 	// }
+
+}
+
+func Test_TrackMongoDBDelete(t *testing.T) {
+
+}
+
+func Test_TrackMongoDBGet(t *testing.T) {
 
 }

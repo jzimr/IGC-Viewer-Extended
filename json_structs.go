@@ -12,6 +12,11 @@ type IgcURL struct {
 	URL string `json:"url"`
 }
 
+// RespondWithID holds the ID of the Track added by the client
+type RespondWithID struct {
+	ID string `json:"id"`
+}
+
 // TrackMetaData includes meta information about a particular track
 type TrackMetaData struct {
 	ID          string  `json:"id"`

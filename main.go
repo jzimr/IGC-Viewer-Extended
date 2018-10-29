@@ -1,8 +1,8 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -21,10 +21,19 @@ func determineListenAddress() (string, error) {
 }
 
 func main() {
-	addr, err := determineListenAddress()
+	// addr, err := determineListenAddress()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// Create JSON
+	testHook := &WebhookRegistration{URL: "https://discordapp.com/api/webhooks/505722994237374466/6yqNRGY1b8jitN_jyhHxLhGc-xThQBqW3L0-xC-X86Hrd__Zi_eMAGki87lv5xzbY2IQ"}
+	b, err := json.Marshal(testHook)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return
 	}
+	fmt.Println(string(b))
 
 	// Run configuration (E.g. initialize database connection)
 	configure()
@@ -33,7 +42,7 @@ func main() {
 	http.HandleFunc("/paragliding/api/", forwardingHandler)
 	http.HandleFunc("/"+config.AdminRoot+"/", adminHandler) // The admin root is configured in "config.json"
 	uptime = time.Now()                                     // Start timer
-	if err := http.ListenAndServe(addr /*":8080"*/, nil); err != nil {
+	if err := http.ListenAndServe( /*addr*/ ":8080", nil); err != nil {
 		panic(err)
 	}
 }

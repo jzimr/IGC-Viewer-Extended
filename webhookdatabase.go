@@ -97,6 +97,21 @@ func (db *WebhookMongoDB) Delete(t WebhookData) bool {
 }
 
 /*
+DeleteAll deletes all tracks in the database
+*/
+func (db *WebhookMongoDB) DeleteAll() error {
+	session, err := mgo.Dial(db.DatabaseURL)
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+
+	_, err = session.DB(db.DatabaseName).C(db.CollectionName).RemoveAll(nil)
+
+	return err
+}
+
+/*
 Count returns the number of items currently in our database
 */
 func (db *WebhookMongoDB) Count() int {
